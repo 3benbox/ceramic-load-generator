@@ -1,30 +1,19 @@
 import { TileDocument } from '@ceramicnetwork/stream-tile'
-import { CeramicClient } from '@ceramicnetwork/http-client'
-import { DID } from 'dids'
-import { Ed25519Provider } from 'key-did-provider-ed25519'
-import { getResolver } from 'key-did-resolver'
-import { randomBytes } from "@stablelib/random";
+import { createCeramic, seedFromString, sleepMs } from "../createCeramic.js";
 
-const apiHost = 'http://k8s-ceramicl-ceramicl-c2448c12e3-997343549.us-east-1.elb.amazonaws.com'
-const seed = "f01b00a249a6e306749ccce083238e082b74fbb37b28beb23656"; // 32 bytes // openssl rand -hex 26
+const apiHost = process.env.API_HOST;
+const seedString = process.env.SEED_STRING;
 
-const anchor = true
-const publish = true
-
-async function createCeramic(apiHost, seed) {
-    const ceramic = new CeramicClient(apiHost || process.env.CERAMIC_ENDPOINT);
-    const provider = new Ed25519Provider(seed)
-    const did = new DID({ provider, resolver: getResolver() })
-    await did.authenticate()
-    ceramic.did = did
-    return ceramic;
+if (!apiHost || !seedString) {
+  throw new Error('API_HOST and SEED_STRING environment variable must be set.');
 }
 
-const buffer = Buffer.from(seed, 'hex'); // convert hex string to buffer
-const fixedBuffer = Buffer.alloc(32); // create new buffer with 32 bytes
-buffer.copy(fixedBuffer, 0, 0, Math.min(buffer.length, fixedBuffer.length)); // copy the bytes from the old buffer to the new buffer
+const anchor = process.env.ANCHOR || true;
+const publish = process.env.PUBLISH || true
+const sleepMSBeforeUpdate = process.env.SLEEP_MS_BEFORE_UPDATE || 1000;
 
-const ceramic = await createCeramic(apiHost, fixedBuffer)
+const seed = seedFromString(seedString);
+const ceramic = await createCeramic(apiHost, seed)
 
 const content0 = {
     foo: `hello-${Math.random()}`,
@@ -36,6 +25,8 @@ const doc = await TileDocument.create(ceramic, content0, undefined, {
 console.debug("ceramic payload:", doc.state);
 console.log("ceramic doc id:", doc.id.toString());
 console.log("--- UPDATING STREAM ---");
+
+await sleepMs(sleepMSBeforeUpdate);
 
 const content1 = {
     foo: `hello-${Math.random()}`,
@@ -49,3 +40,4 @@ console.debug("ceramic payload:", doc.state);
 console.log("ceramic doc id:", doc.id.toString());
 console.log("--- UPDATED ---");
 
+await sleepMs(sleepMSBeforeUpdate);
