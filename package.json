@@ -1,0 +1,21 @@
+{
+  "name": "ceramic-load-generator",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ceramicnetwork/http-client": "^2.21.0",
+    "@ceramicnetwork/stream-tile": "^2.20.0",
+    "@stablelib/base64": "^1.0.1",
+    "@stablelib/random": "^1.0.2",
+    "dids": "^4.0.0",
+    "key-did-provider-ed25519": "^3.0.0",
+    "key-did-resolver": "^3.0.0"
+  }
+}
