@@ -1,19 +1,25 @@
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { createCeramic, seedFromString, sleepMs } from "../createCeramic.js";
+import {randomBytes} from "@stablelib/random";
 
 const apiHost = process.env.API_HOST;
 const seedString = process.env.SEED_STRING;
 
-if (!apiHost || !seedString) {
-    throw new Error('API_HOST and SEED_STRING environment variable must be set.');
+if (!apiHost) {
+    throw new Error('API_HOST environment variable must be set.');
 }
 
 const anchor = process.env.ANCHOR || true;
 const publish = process.env.PUBLISH || true
 const sleepMSBeforeUpdate = process.env.SLEEP_MS_BEFORE_UPDATE || 1000;
 const updateIterations = process.env.UPDATE_ITERATIONS || 10;
+let seed
 
-const seed = seedFromString(seedString);
+if (!seedString) {
+    seed = randomBytes(32);
+} else {
+    seed = seedFromString(seedString);
+}
 const ceramic = await createCeramic(apiHost, seed)
 
 const content0 = {
